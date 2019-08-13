@@ -30,20 +30,24 @@ class HomeController extends Controller {
 	}
 
 	public function home() {
-		$usuario = Usuario::where('id', $_SESSION['login'])->get();
-		$usuario = Usuario::where('permissao', $usuario['0']['permissao'])->get();
-		if(count($usuario) == 1) {
-			$usuario = Usuario::all();
-
-			$array = array('usuario'=>$usuario);
-
-			return view('admin', $array);
-		} else {
+		if(isset($_SESSION['login']) && !empty($_SESSION['login'])) {
 			$usuario = Usuario::where('id', $_SESSION['login'])->get();
+			$usuario = Usuario::where('permissao', $usuario['0']['permissao'])->get();
+			if(count($usuario) == 1) {
+				$usuario = Usuario::all();
 
-			$array = array('usuario'=>$usuario);
+				$array = array('usuario'=>$usuario);
 
-			return view('perfil', $array);
+				return view('admin', $array);
+			} else {
+				$usuario = Usuario::where('id', $_SESSION['login'])->get();
+
+				$array = array('usuario'=>$usuario);
+
+				return view('perfil', $array);
+			}
+		} else {
+			return redirect('/login');
 		}
 		
 	}
@@ -64,25 +68,34 @@ class HomeController extends Controller {
 	}
 
 	public function desativar($id) {
-		$usuario = Usuario::find($id);
-		$usuario->status = 'desativado';
-		$usuario->save();
+		if($id == $_SESSION['login'] || $_SESSION['login'] == 1) {
+			$usuario = Usuario::find($id);
+			$usuario->status = 'desativado';
+			$usuario->save();
+		}		
 
 		return redirect('/');
 	}
 
 	public function excluir($id) {
-		$usuario = Usuario::find($id)->delete();
+		if($id == $_SESSION['login'] || $_SESSION['login'] == 1) {
+			$usuario = Usuario::find($id)->delete();
+		}		
 
 		return redirect('/');
 	}
 
 	public function editar($id) {
-		$usuario = Usuario::find($id);
+		if($id == $_SESSION['login'] || $_SESSION['login'] == 1) {
+			$usuario = Usuario::find($id);
 
-		$array = array('usuario'=>$usuario);
+			$array = array('usuario'=>$usuario);
 
-		return view('editar', $array);
+			return view('editar', $array);
+		} else {
+			return redirect('/');
+		}
+		
 	}
 
 	public function alterar(Request $req) {
@@ -100,11 +113,16 @@ class HomeController extends Controller {
 	}
 
 	public function senha($id) {
-		$usuario = Usuario::find($id);
+		if($id == $_SESSION['login'] || $_SESSION['login'] == 1) {
+			$usuario = Usuario::find($id);
 
-		$array = array('usuario'=>$usuario);
+			$array = array('usuario'=>$usuario);
 
-		return view('editar-senha', $array);
+			return view('editar-senha', $array);
+		} else {
+			return redirect('/');
+		}
+
 	}
 
 	public function alterarSenha(Request $req) {
